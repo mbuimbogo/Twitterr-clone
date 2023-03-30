@@ -19,11 +19,14 @@ import { db, storage } from "../firebase";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { deleteObject, ref } from "firebase/storage";
+import { modalState } from "../atom/modalAtom";
+import { useRecoilState } from "recoil";
 
 export default function Post({ post }) {
   const { data: session } = useSession();
   const [likes, setLikes] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
+  const [open, setOpen] = useRecoilState(modalState);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -55,10 +58,9 @@ export default function Post({ post }) {
   async function deletePost() {
     if (window.confirm("Are you sure you want to delete this post?")) {
       deleteDoc(doc(db, "posts", post.id)); //delete from database
-      if(post.data().image){
+      if (post.data().image) {
         deleteObject(ref(storage, `posts/${post.id}/image`)); //delete from storage
       }
-      
     }
   }
 
@@ -105,7 +107,10 @@ export default function Post({ post }) {
         />
         {/* icons */}
         <div className="flex justify-between text-gray-500 p-2">
-          <ChatIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
+          <ChatIcon
+            className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
+            onClick={() => setOpen(!open)}
+          />
           {session?.user.uid === post?.data().id && (
             <TrashIcon
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
