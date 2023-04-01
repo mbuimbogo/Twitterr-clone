@@ -107,7 +107,7 @@ export default function Post({ post, id }) {
           <DotsHorizontalIcon className="h-10 hoverEffect  w-10 hover:bg-sky-100 hover:text-sky-500 p-2" />
         </div>
         {/* post text */}
-        <p className="text-gray-800 text-[15px] sm:text-[16px] mb-2">
+        <p onClick={()=> router.push(`/posts/${id}`)} className="text-gray-800 text-[15px] sm:text-[16px] mb-2">
           {post?.data()?.text}
         </p>
         {/* post image */}
@@ -116,6 +116,7 @@ export default function Post({ post, id }) {
           width="400px"
           src={post?.data()?.image}
           alt="image"
+          onClick={()=> router.push(`/posts/${id}`)}
         />
         {/* icons */}
         <div className="flex justify-between text-gray-500 p-2">

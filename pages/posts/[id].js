@@ -33,7 +33,8 @@ export default function PostPage({ newsResults, randomUsersResults }) {
       query(
         collection(db, "posts", id, "comments"),
         orderBy("timestamp", "desc")
-      ),(snapshot)=> setComments(snapshot.docs)
+      ),
+      (snapshot) => setComments(snapshot.docs)
     );
   }, [db, id]);
 
@@ -64,16 +65,16 @@ export default function PostPage({ newsResults, randomUsersResults }) {
           <Post id={id} post={post} />
           {comments.length > 0 && (
             <div>
-            {comments.map((comment) =>(
-                <Comment 
-                key={comment.id} 
-                id={comment.id} 
-                comment={comment.data()}
+              {comments.map((comment) => (
+                <Comment
+                  key={comment.id}
+                  commentId={comment.id}
+                  originalPostId={id}
+                  comment={comment.data()}
                 />
               ))}
             </div>
           )}
-          
         </div>
 
         {/* Widgets */}
