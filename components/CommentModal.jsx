@@ -1,21 +1,31 @@
 import { useRecoilState } from "recoil";
 import { modalState, postIdState } from "../atom/modalAtom";
 import Modal from "react-modal";
-import { EmojiHappyIcon, PhotographIcon, XIcon } from "@heroicons/react/outline";
+import {
+  EmojiHappyIcon,
+  PhotographIcon,
+  XIcon,
+} from "@heroicons/react/outline";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { addDoc, collection, doc, onSnapshot, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
 import Moment from "react-moment";
-import {useSession} from "next-auth/react"
 import { useRouter } from "next/router";
+import { userState } from "../atom/userAtom";
 
 export default function CommentModal() {
   const [open, setOpen] = useRecoilState(modalState);
   const [postId] = useRecoilState(postIdState);
   const [post, setPost] = useState({});
   const [input, setInput] = useState("");
-  const {data: session} = useSession();
-  const router = useRouter()
+  const [currentUser] = useRecoilState(userState);
+  const router = useRouter();
 
   useEffect(() => {
     onSnapshot(doc(db, "posts", postId), (snapshot) => {
@@ -23,19 +33,18 @@ export default function CommentModal() {
     });
   }, [postId, db]);
 
-
-  async function sendComment(){
+  async function sendComment() {
     await addDoc(collection(db, "posts", postId, "comments"), {
-        comment: input,
-        name: session.user.name,
-        username: session.user.username,
-        userImg: session.user.image,
-        timestamp: serverTimestamp(),
-        userId: session.user.uid
-    })
-    setOpen(false)
-    setInput("")
-    router.push(`/posts/${postId}`)
+      comment: input,
+      name: currentUser.name,
+      username: currentUser.username,
+      userImg: currentUser.userImg,
+      timestamp: serverTimestamp(),
+      userId: currentUser.uid,
+    });
+    setOpen(false);
+    setInput("");
+    router.push(`/posts/${postId}`);
   }
 
   return (
@@ -56,7 +65,7 @@ export default function CommentModal() {
               </div>
             </div>
             <div className="p-2 flex items-center space-x-1 relative">
-                <span className="w-0.5 h-full z-[-1] absolute left-8 top-11 bg-gray-300"></span>
+              <span className="w-0.5 h-full z-[-1] absolute left-8 top-11 bg-gray-300"></span>
               <img
                 src={post?.data()?.userImg}
                 alt="user-image"
@@ -72,29 +81,29 @@ export default function CommentModal() {
                 <Moment fromNow>{post?.data()?.timestamp?.toDate()}</Moment>
               </span>
             </div>
-            <p className="text-gray-500 text-[15px] sm:text-[16px] ml-16 mb-2">{post?.data()?.text}</p>
-        <div className="flex  p-3 space-x-3">
-          <img
-            
-            src={session.user.image}
-            alt="user-image"
-            className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95"
-          />
+            <p className="text-gray-500 text-[15px] sm:text-[16px] ml-16 mb-2">
+              {post?.data()?.text}
+            </p>
+            <div className="flex  p-3 space-x-3">
+              <img
+                src={currentUser.userImg}
+                alt="user-image"
+                className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95"
+              />
 
-          <div className="w-full divide-y divide-gray-200">
-            <div>
-              <textarea
-                className="w-full border-none focus:ring-0 text-lg placeholder-gray-700 tracking-wide min-h-[50px] text-gray-700"
-                rows="2"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Tweet your reply"
-              ></textarea>
-            </div>
-            
+              <div className="w-full divide-y divide-gray-200">
+                <div>
+                  <textarea
+                    className="w-full border-none focus:ring-0 text-lg placeholder-gray-700 tracking-wide min-h-[50px] text-gray-700"
+                    rows="2"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Tweet your reply"
+                  ></textarea>
+                </div>
 
-            <div className="flex items-center justify-between pt-2.5">
-                                <div
+                <div className="flex items-center justify-between pt-2.5">
+                  <div
                     className="flex"
                     //onClick={() => filePickerRef.current.click()}
                   >
@@ -117,11 +126,9 @@ export default function CommentModal() {
                   >
                     Reply
                   </button>
-                
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-            
           </div>
         </Modal>
       )}

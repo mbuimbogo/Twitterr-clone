@@ -16,20 +16,22 @@ import {
 } from "firebase/firestore";
 import Moment from "react-moment";
 import { db, storage } from "../firebase";
-import { signIn, useSession } from "next-auth/react";
+
 import { useEffect, useState } from "react";
 import { deleteObject, ref } from "firebase/storage";
 import { modalState, postIdState } from "../atom/modalAtom";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
+import { userState } from "../atom/userAtom"
 
 export default function Post({ post, id }) {
-  const { data: session } = useSession();
+  
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
   const [open, setOpen] = useRecoilState(modalState);
   const [postId, setPostId] = useRecoilState(postIdState);
+  const [currentUser, setCurrentUser] = useRecoilState(userState)
   const router = useRouter();
 
   useEffect(() => {
@@ -48,21 +50,22 @@ export default function Post({ post, id }) {
 
   useEffect(() => {
     setHasLiked(
-      likes.findIndex((like) => like.id === session?.user.uid) !== -1
+      likes.findIndex((like) => like.id === currentUser?.uid) !== -1
     );
-  }, [likes]);
+  }, [likes,currentUser]);
 
   async function likePost() {
-    if (session) {
+    if (currentUser) {
       if (hasLiked) {
-        await deleteDoc(doc(db, "posts", id, "likes", session?.user.uid));
+        await deleteDoc(doc(db, "posts", id, "likes", currentUser.uid));
       } else {
-        await setDoc(doc(db, "posts", id, "likes", session?.user.uid), {
-          username: session.user.name,
+        await setDoc(doc(db, "posts", id, "likes", currentUser.uid), {
+          username: currentUser?.name,
         });
       }
     } else {
-      signIn();
+      // signIn();
+      router.push("/auth/signin")
     }
   }
 
@@ -115,7 +118,7 @@ export default function Post({ post, id }) {
           className="rounded-2xl mr-2"
           width="400px"
           src={post?.data()?.image}
-          alt="image"
+          alt=""
           onClick={()=> router.push(`/posts/${id}`)}
         />
         {/* icons */}
@@ -124,8 +127,9 @@ export default function Post({ post, id }) {
           <ChatIcon
             className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
             onClick={() => {
-              if (!session) {
-                signIn();
+              if (!currentUser) {
+                // signIn();
+                router.push("/auth/signin")
               } else {
                 setPostId(id);
                 setOpen(!open);
@@ -135,7 +139,7 @@ export default function Post({ post, id }) {
           {comments.length > 0 && <span className="text-sm">{comments.length}</span>
           }
           </div>
-          {session?.user.uid === post?.data()?.id && (
+          {currentUser?.uid === post?.data()?.id && (
             <TrashIcon
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
               onClick={deletePost}
