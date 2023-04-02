@@ -21,6 +21,7 @@ const onGoogleClick = async()=>{
       email: user.email,
       username: user.displayName.split(" ").join("").toLocaleLowerCase(),
       userImg: user.photoURL,
+      uid: user.uid,
       timestamp: serverTimestamp()
     })
   }
