@@ -64,7 +64,11 @@ export default function Input() {
     }
   };
 
- 
+  function onSignOut(){
+    signOut(auth)
+    setCurrentUser(null)
+  }
+  
   return (
     <>
       {currentUser && (
