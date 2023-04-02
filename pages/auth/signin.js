@@ -1,5 +1,7 @@
 import {db} from "../../firebase"
 import {getAuth, signInWithPopup, GoogleAuthProvider} from "firebase/auth"
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+
 export default function Signin() {
   
 
@@ -7,7 +9,22 @@ export default function Signin() {
 const onGoogleClick = async()=>{
   const auth = getAuth()
   const provider = new GoogleAuthProvider();
+
   await signInWithPopup(auth, provider);
+  const user = auth.currentUser.providerData[0];
+  const docRef = doc(db, "users", user.uid) // create a users collection in firestore
+  const docSnap = await getDoc(docRef)
+
+  if(!docSnap.exists()){
+    await setDoc(docRef, {
+      name: user.displayName,
+      email: user.email,
+      username: user.displayName.split(" ").join("").toLocaleLowerCase(),
+      userImg: user.photoURL,
+      timestamp: serverTimestamp()
+    })
+  }
+  console.log(user)
 }
     
   return (
