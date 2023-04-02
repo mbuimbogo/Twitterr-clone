@@ -1,9 +1,13 @@
-
-
+import {db} from "../../firebase"
+import {getAuth, signInWithPopup, GoogleAuthProvider} from "firebase/auth"
 export default function Signin() {
+  
+
 
 const onGoogleClick = async()=>{
-  
+  const auth = getAuth()
+  const provider = new GoogleAuthProvider();
+  await signInWithPopup(auth, provider);
 }
     
   return (
