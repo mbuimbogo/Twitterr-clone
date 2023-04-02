@@ -44,7 +44,10 @@ export default function Sidebar() {
      
     },[]);
 
-    
+    function onSignOut(){
+      signOut(auth)
+      setCurrentUser(null)
+    }
     
 
   return (
